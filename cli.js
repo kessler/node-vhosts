@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var help = require('./lib/help.js')
 var argv = require('minimist')(process.argv.slice(2))
 var debug = require('debug')('vhosts:cli')
