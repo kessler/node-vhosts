@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kessler/vhosts"
+    "url": "https://github.com/kessler/node-vhosts"
   },
   "keywords": [
     "express",
@@ -26,7 +26,7 @@
     "connect": "^3.0.1",
     "debug": "^1.0.1",
     "directory-cache": "^3.0.2",
-    "dynamic-middleware": "0.0.3",
+    "dynamic-middleware": "0.0.4",
     "kessler": "0.0.14",
     "lodash": "^2.4.1",
     "minimist": "^0.1.0",
