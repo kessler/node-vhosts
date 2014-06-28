@@ -2,7 +2,7 @@
   "name": "vhosts",
   "version": "1.0.0",
   "description": "A server that quickly load and unload vhost express/connect apps",
-  "main": "server.js",
+  "bin": "cli.js",
   "scripts": {
     "test": "mocha"
   },
@@ -14,6 +14,7 @@
     "express",
     "vhosts"
   ],
+  "preferGlobal": true,
   "author": "Yaniv Kessler",
   "license": "MIT",
   "bugs": {

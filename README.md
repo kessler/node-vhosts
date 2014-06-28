@@ -43,6 +43,8 @@ Daemon was stopped
       ✓ for windows os - a file _ to represent *
       ✓ via add command
 ```
+Apart from adding domains->app.js mapping via cli one might also do so via direct file creation at the directory specified in the config. The name of the file should be the domain (substituting _ for *) and the content of the file should be the path to an app.js file
+
 ### configuration
 standard [rc](https://github.com/dominictarr/rc) config, named ```vhosts```
 ```
