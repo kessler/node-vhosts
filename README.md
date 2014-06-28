@@ -47,10 +47,8 @@ Daemon was stopped
 standard [rc](https://github.com/dominictarr/rc) config, named ```vhosts```
 ```
 	{		
-		"port": 3000,
-		
+		"port": 3000,		
 		"directory": "/some/path",
-
 		"extensionBlacklist": [".swx", "swp"]
 	}
 ```
