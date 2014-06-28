@@ -4,7 +4,7 @@
   "description": "A server that quickly load and unload vhost express/connect apps",
   "bin": "cli.js",
   "scripts": {
-    "test": "mocha"
+    "test": "sudo mocha -R spec"
   },
   "repository": {
     "type": "git",
