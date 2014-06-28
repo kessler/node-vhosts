@@ -1,6 +1,6 @@
 {
   "name": "vhosts",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A server that quickly load and unload vhost express/connect apps",
   "bin": "cli.js",
   "scripts": {
