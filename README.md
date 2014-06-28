@@ -1,6 +1,6 @@
 # vhosts
 
-A server that quickly load and unload vhost express/connect apps
+A cli based vhosts server for express/connect apps
 
 ### install
 ```
@@ -62,4 +62,5 @@ windows
 ### Alternatives
 
 [express-fast-vhosts](https://www.npmjs.org/package/express-fast-vhosts)
+
 [vhostess](https://www.npmjs.org/package/vhostess)
