@@ -27,6 +27,7 @@
     "debug": "^1.0.1",
     "directory-cache": "^3.0.2",
     "dynamic-middleware": "0.0.3",
+    "kessler": "0.0.14",
     "lodash": "^2.4.1",
     "minimist": "^0.1.0",
     "rc": "^0.4.0",
