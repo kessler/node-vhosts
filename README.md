@@ -76,3 +76,8 @@ windows
 [express-fast-vhosts](https://www.npmjs.org/package/express-fast-vhosts)
 
 [vhostess](https://www.npmjs.org/package/vhostess)
+
+### TODO
+* implement restart server 
+* implement reload vhost
+
