@@ -14,36 +14,16 @@ var rimraf = require('rimraf')
 var fs = require('fs')
 
 var WORK_DIR = path.join(__dirname, 'work')
-var DOMAIN_DIR = path.join(WORK_DIR, 'domains')
+var APP_FILE = path.join(__dirname, 'testApp.js')
 var OUT_LOG = path.join(WORK_DIR, 'out.log')
 var ERR_LOG = path.join(WORK_DIR, 'err.log')
 var PID_FILE = path.join(WORK_DIR, 'vhosts.pid')
-var APP_FILE = path.join(WORK_DIR, 'app.js')
 
-// service different hosts + remove hosts on the fly
-var SAMPLE_DOMAIN_1 = 'www.' + uuid() + '.com'
-
-// add vhosts on the fly
-var SAMPLE_DOMAIN_2 = 'www.' + uuid() + '.com'
-var SAMPLE_DOMAIN_3 = 'www.' + uuid() + '.com'
-
-// add wildcard hosts
-var SAMPLE_DOMAIN_4_BASE = uuid() + '.com'
-var SAMPLE_DOMAIN_4_FILE = '_.' + SAMPLE_DOMAIN_4_BASE
-var SAMPLE_DOMAIN_4_SUB1 = 'a.' + SAMPLE_DOMAIN_4_BASE
-var SAMPLE_DOMAIN_4_SUB2 = 'b.' + SAMPLE_DOMAIN_4_BASE
-
-var SAMPLE_DOMAIN_5_BASE = uuid() + '.com'
-var SAMPLE_DOMAIN_5_FILE = 'a_.' + SAMPLE_DOMAIN_5_BASE
-var SAMPLE_DOMAIN_5_SUB1 = 'a1.' + SAMPLE_DOMAIN_5_BASE
-var SAMPLE_DOMAIN_5_SUB2 = 'a2.' + SAMPLE_DOMAIN_5_BASE
-
-var SAMPLE_DOMAIN_6_BASE = uuid() + '.com'
-var SAMPLE_DOMAIN_6 = '*.' + SAMPLE_DOMAIN_6_BASE
-var SAMPLE_DOMAIN_6_SUB1 = 'a1.' + SAMPLE_DOMAIN_6_BASE
-var SAMPLE_DOMAIN_6_SUB2 = 'a2.' + SAMPLE_DOMAIN_6_BASE
-
-var PREEXISTING_DOMAIN_FILE = path.join(DOMAIN_DIR, SAMPLE_DOMAIN_1)
+var domains = [
+	'a.' + uuid() + '.com',
+	'b.' + uuid() + '.com',
+	'c.' + uuid() + '.com',
+]
 
 describe('vhosts service can', function () {
 	this.timeout(10000)
@@ -53,37 +33,15 @@ describe('vhosts service can', function () {
 	after(afterAll)
 
 	it('stop (stop command)', function(done) {
-		async.waterfall([
-			_.partial(exec, command('start')),
-			_.partial(testGoodUrl, 'http://localhost:3000', 'ok'),
-			_.partial(exec, command('stop')),
-			_.partial(testBadUrl, 'http://localhost:3000'),
-		], done)
 	})
 
 	it('start (start command)', function (done) {
-		async.waterfall([
-			_.partial(exec, command('start')),
-			_.partial(testGoodUrl, 'http://localhost:3000', 'ok'),
-			_.partial(exec, command('stop'))
-		], done)
 	})
 
 	it('report status (status command)', function(done) {		
-		async.waterfall([
-			_.partial(exec, command('start')),
-			_.partial(assertStatusReport, 'running'),
-			_.partial(exec, command('stop')),
-			_.partial(assertStatusReport, 'stopped')
-		], done)
 	})
 	
 	it('service different vhosts (' +SAMPLE_DOMAIN_1 + ')', function(done) {
-		async.waterfall([
-			_.partial(exec, command('start')),
-			_.partial(testGoodUrl, 'http://' + SAMPLE_DOMAIN_1+ ':3000', 'vhost'),
-			_.partial(exec, command('stop'))
-		], done)
 	})
 
 	it.skip('lists vhosts', function() {
@@ -93,16 +51,6 @@ describe('vhosts service can', function () {
 	describe('add vhosts on the fly' , function () {
 
 		it('via file creation in cache directory (' + SAMPLE_DOMAIN_2 + ')', function(done) {
-			var url = 'http://' + SAMPLE_DOMAIN_2 + ':3000'
-
-			async.waterfall([
-				_.partial(exec, command('start')),				
-				_.partial(testBadUrl, url),
-				_.bind(fs.writeFile, fs, path.join(DOMAIN_DIR, SAMPLE_DOMAIN_2), APP_FILE),
-				delay(500),
-				_.partial(testGoodUrl, url, 'vhost'),				
-				_.partial(exec, command('stop'))
-			], done)		
 		})
 
 		it('via add command (' + SAMPLE_DOMAIN_3 + ')', function(done) {
@@ -121,62 +69,13 @@ describe('vhosts service can', function () {
 
 	describe('remove hosts on the fly', function () {
 		it('via file deletion', function (done) {
-			var url = 'http://' + SAMPLE_DOMAIN_1 + ':3000'
-			async.waterfall([
-				_.partial(exec, command('start')),			
-				_.partial(testGoodUrl, url, 'vhost'),
-				_.bind(fs.unlink, fs, PREEXISTING_DOMAIN_FILE),
-				delay(500),
-				_.partial(testBadUrl, url),
-				_.partial(exec, command('stop'))
-			], done)
 		})
 
 		it('via remove command', function (done) {
-			var url = 'http://' + SAMPLE_DOMAIN_1 + ':3000'
-			async.waterfall([
-				_.partial(exec, command('start')),			
-				_.partial(testGoodUrl, url, 'vhost'),
-				_.partial(exec, command('remove', SAMPLE_DOMAIN_1)),
-				delay(500),
-				_.partial(testBadUrl, url),
-				_.partial(exec, command('stop'))
-			], done)
 		})
 	})
 
 	describe('add wildcard hosts', function (done) {
-		it('for windows os - a file with _ to represent * (' + SAMPLE_DOMAIN_4_FILE + ')', function(done) {
-			var url1 = 'http://' + SAMPLE_DOMAIN_4_SUB1 + ':3000'
-			var url2 = 'http://' + SAMPLE_DOMAIN_4_SUB2 + ':3000'
-
-			async.waterfall([
-				_.partial(exec, command('start')),			
-				_.partial(testBadUrl, url1),
-				_.partial(testBadUrl, url2),
-				_.bind(fs.writeFile, fs, path.join(DOMAIN_DIR, SAMPLE_DOMAIN_4_FILE), APP_FILE),
-				delay(500),								
-				_.partial(testGoodUrl, url1, 'vhost'),				
-				_.partial(testGoodUrl, url2, 'vhost'),				
-				_.partial(exec, command('stop'))
-			], done)
-		})	
-
-		it('for windows os - a file _ to represent * (' + SAMPLE_DOMAIN_5_FILE + ')', function(done) {
-			var url1 = 'http://' + SAMPLE_DOMAIN_5_SUB1 + ':3000'
-			var url2 = 'http://' + SAMPLE_DOMAIN_5_SUB2 + ':3000'
-
-			async.waterfall([
-				_.partial(exec, command('start')),			
-				_.partial(testBadUrl, url1),
-				_.partial(testBadUrl, url2),
-				_.bind(fs.writeFile, fs, path.join(DOMAIN_DIR, SAMPLE_DOMAIN_5_FILE), APP_FILE),
-				delay(500),								
-				_.partial(testGoodUrl, url1, 'vhost'),				
-				_.partial(testGoodUrl, url2, 'vhost'),				
-				_.partial(exec, command('stop'))
-			], done)
-		})
 
 		it('via add command (' + SAMPLE_DOMAIN_6 + ')', function(done) {
 			var url1 = 'http://' + SAMPLE_DOMAIN_6_SUB1 + ':3000'
@@ -304,19 +203,13 @@ function execWithOutput(cmd, callback) {
 function beforeAll(done) {
 			
 	var init = [
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_1),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_2),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_3),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_4_SUB1),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_4_SUB2),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_5_SUB1),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_5_SUB2),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_6_SUB1),
-		_.partial(hostile.set, '127.0.0.1', SAMPLE_DOMAIN_6_SUB2)
+		_.partial(hostile.set, '127.0.0.1', domains[1]),
+		_.partial(hostile.set, '127.0.0.1', domains[2]),
+		_.partial(hostile.set, '127.0.0.1', domains[3]),		
 	]
 
-	if (fs.existsSync(DOMAIN_DIR))
-		init.push(_.bind(rimraf, null, DOMAIN_DIR))			
+	if (fs.existsSync(WORK_DIR))
+		init.push(_.bind(rimraf, null, WORK_DIR))			
 	
 	if (fs.existsSync(OUT_LOG))
 		init.push(_.bind(fs.unlink, fs, OUT_LOG))
@@ -327,18 +220,9 @@ function beforeAll(done) {
 	if (fs.existsSync(PID_FILE))
 		init.push(_.bind(fs.unlink, fs, PID_FILE))
 
-	init.push(_.bind(fs.mkdir, fs, DOMAIN_DIR))
+	init.push(_.bind(fs.mkdir, fs, WORK_DIR))
 	
 	async.waterfall(init, done)		
-}
-
-function beforeEachImpl(done) {
-	
-	if (!fs.existsSync(PREEXISTING_DOMAIN_FILE)) {
-		fs.writeFile(PREEXISTING_DOMAIN_FILE, APP_FILE, done)
-	} else {
-		done()
-	}
 }
 
 /*
@@ -346,15 +230,9 @@ function beforeEachImpl(done) {
 */
 function afterAll(done) {
 	async.waterfall([
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_1),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_2),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_3),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_4_SUB1),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_4_SUB2),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_5_SUB1),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_5_SUB2),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_6_SUB1),
-		_.partial(hostile.remove, '127.0.0.1', SAMPLE_DOMAIN_6_SUB2),
+		_.partial(hostile.remove, '127.0.0.1', domains[1]),
+		_.partial(hostile.remove, '127.0.0.1', domains[2]),
+		_.partial(hostile.remove, '127.0.0.1', domains[3]),
 		_.partial(exec, command('stop'))
 	], function(err) {
 		if (err) console.log(err)

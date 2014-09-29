@@ -1,3 +1,4 @@
 *.log
 *.pid
-domains
+*.db
+work
